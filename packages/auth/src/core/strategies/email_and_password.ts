@@ -34,7 +34,6 @@ import { _setActionCodeSettingsOnRequest } from './action_code_settings';
 import { signInWithCredential } from './credential';
 import { _castAuth } from '../auth/auth_impl';
 import { AuthErrorCode } from '../errors';
-import { ServerError } from '../../api/errors';
 import { getModularInstance } from '@firebase/util';
 import { OperationType } from '../../model/enums';
 import { injectRecaptchaFields } from '../../platform_browser/recaptcha/recaptcha_enterprise_verifier';
@@ -94,7 +93,7 @@ export async function sendPasswordResetEmail(
       _setActionCodeSettingsOnRequest(authInternal, request, actionCodeSettings);
     }
     await authentication.sendPasswordResetEmail(authInternal, request).catch(async (error) => {
-      if (error.code === `auth/${ServerError.MISSING_RECAPTCHA_TOKEN}`) {
+      if (error.code === `auth/${AuthErrorCode.MISSING_RECAPTCHA_TOKEN}`) {
         console.log("Password resets are protected by reCAPTCHA for this project. Automatically triggering the reCAPTCHA flow and restarting the password reset flow.");
         const requestWithRecaptcha = await injectRecaptchaFields(authInternal, request, RecaptchaActionName.GET_OOB_CODE, true);
         if (actionCodeSettings) {
@@ -260,7 +259,7 @@ export async function createUserWithEmailAndPassword(
     signUpResponse = signUp(authInternal, requestWithRecaptcha);
   } else {
     signUpResponse = signUp(authInternal, request).catch(async (error) => {
-      if (error.code === `auth/${ServerError.MISSING_RECAPTCHA_TOKEN}`) {
+      if (error.code === `auth/${AuthErrorCode.MISSING_RECAPTCHA_TOKEN}`) {
         console.log("Sign-up is protected by reCAPTCHA for this project. Automatically triggering the reCAPTCHA flow and restarting the sign-up flow.");
         const requestWithRecaptcha = await injectRecaptchaFields(authInternal, request, RecaptchaActionName.SIGN_UP_PASSWORD);
         return signUp(authInternal, requestWithRecaptcha);
